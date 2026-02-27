@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V-Kiks — Get Your Kicks, Vicariously</title>
+  <meta name="description" content="Find people to share experiences with. Watch movies, shows, and live events together. Get your kicks, vicariously.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #06060e;
+      --bg-surface: #0d0d1a;
+      --bg-card: #12122a;
+      --bg-card-hover: #1a1a3a;
+      --bg-input: #0f0f24;
+      --accent-cyan: #00e5ff;
+      --accent-magenta: #ff2d78;
+      --accent-orange: #ff6b2b;
+      --accent-purple: #8b5cf6;
+      --accent-green: #22c55e;
+      --text-primary: #f0f0f8;
+      --text-secondary: #8888aa;
+      --text-muted: #555577;
+      --border-subtle: rgba(255,255,255,0.06);
+      --border-glow: rgba(0,229,255,0.2);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --font-display: 'Outfit', sans-serif;
+      --font-mono: 'Space Mono', monospace;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; -webkit-font-smoothing:antialiased; }
+    body { font-family:var(--font-display); background:var(--bg-deep); color:var(--text-primary); line-height:1.6; min-height:100vh; overflow-x:hidden; }
+    a { color:var(--accent-cyan); text-decoration:none; transition:color .2s; }
+    a:hover { color:#66f0ff; }
+
+    .bg-grid { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; background-image:linear-gradient(rgba(0,229,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,0.03) 1px,transparent 1px); background-size:60px 60px; }
+    .bg-glow { position:fixed; border-radius:50%; filter:blur(120px); pointer-events:none; z-index:0; }
+    .bg-glow-1 { width:600px; height:600px; background:rgba(0,229,255,0.06); top:-200px; right:-100px; animation:float 20s ease-in-out infinite; }
+    .bg-glow-2 { width:500px; height:500px; background:rgba(255,45,120,0.05); bottom:-200px; left:-100px; animation:float 25s ease-in-out infinite reverse; }
+    @keyframes float { 0%,100%{transform:translate(0,0)} 33%{transform:translate(30px,-30px)} 66%{transform:translate(-20px,20px)} }
+
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 28px; border-radius:var(--radius-md); font-family:var(--font-display); font-weight:600; font-size:0.95rem; border:none; cursor:pointer; transition:all .25s ease; text-decoration:none; white-space:nowrap; }
+    .btn-primary { background:linear-gradient(135deg,var(--accent-cyan),#00b8d4); color:var(--bg-deep); box-shadow:0 0 20px rgba(0,229,255,0.25); }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 0 35px rgba(0,229,255,0.4); color:var(--bg-deep); }
+    .btn-secondary { background:transparent; color:var(--text-primary); border:1px solid rgba(255,255,255,0.15); }
+    .btn-secondary:hover { border-color:var(--accent-cyan); color:var(--accent-cyan); background:rgba(0,229,255,0.05); }
+    .btn-sm { padding:8px 18px; font-size:0.85rem; }
+    .btn-lg { padding:16px 36px; font-size:1.1rem; }
+
+    .form-group { margin-bottom:20px; }
+    .form-group label { display:block; font-size:0.85rem; font-weight:500; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; }
+    .form-input { width:100%; padding:12px 16px; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); color:var(--text-primary); font-family:var(--font-display); font-size:0.95rem; transition:border-color .2s,box-shadow .2s; outline:none; }
+    .form-input:focus { border-color:var(--accent-cyan); box-shadow:0 0 0 3px rgba(0,229,255,0.1); }
+    .form-input::placeholder { color:var(--text-muted); }
+
+    .nav { position:sticky; top:0; z-index:100; background:rgba(6,6,14,0.85); backdrop-filter:blur(20px); border-bottom:1px solid var(--border-subtle); padding:0 24px; }
+    .nav-inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; height:64px; }
+    .nav-logo { font-family:var(--font-mono); font-size:1.3rem; font-weight:700; color:var(--text-primary); letter-spacing:-0.5px; }
+    .nav-logo span { color:var(--accent-cyan); }
+    .nav-links { display:flex; align-items:center; gap:8px; }
+    .nav-link { padding:8px 16px; border-radius:var(--radius-sm); font-size:0.9rem; font-weight:500; color:var(--text-secondary); transition:all .2s; cursor:pointer; border:none; background:none; font-family:var(--font-display); }
+    .nav-link:hover { color:var(--text-primary); background:rgba(255,255,255,0.05); }
+    .nav-hamburger { display:none; background:none; border:none; color:var(--text-primary); font-size:1.5rem; cursor:pointer; padding:8px; }
+    @media(max-width:768px) {
+      .nav-hamburger { display:block; }
+      .nav-links { display:none; position:absolute; top:64px; left:0; right:0; background:rgba(6,6,14,0.95); backdrop-filter:blur(20px); flex-direction:column; padding:16px; border-bottom:1px solid var(--border-subtle); }
+      .nav-links.open { display:flex; }
+      .nav-link { width:100%; text-align:left; padding:12px 16px; }
+    }
+
+    .hero { position:relative; z-index:1; text-align:center; padding:120px 24px 80px; max-width:900px; margin:0 auto; }
+    .hero-badge { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; background:rgba(0,229,255,0.08); border:1px solid rgba(0,229,255,0.2); border-radius:100px; font-size:0.8rem; font-weight:500; color:var(--accent-cyan); margin-bottom:32px; text-transform:uppercase; letter-spacing:1px; animation:fadeInDown .6s ease; }
+    .hero-badge::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--accent-cyan); animation:pulse-dot 2s ease-in-out infinite; }
+    @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.3} }
+    .hero h1 { font-size:clamp(2.8rem,7vw,5rem); font-weight:900; line-height:1.05; margin-bottom:24px; letter-spacing:-2px; animation:fadeInUp .8s ease; }
+    .gradient-text { background:linear-gradient(135deg,var(--accent-cyan),var(--accent-magenta)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .hero-tagline { font-family:var(--font-mono); font-size:1.1rem; color:var(--text-secondary); margin-bottom:48px; animation:fadeInUp .8s ease .2s backwards; }
+    .hero-sub { color:var(--text-secondary); max-width:560px; margin:0 auto 40px; font-size:1.05rem; }
+    .hero-actions { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; animation:fadeInUp .8s ease .4s backwards; }
+    @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes fadeInDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+
+    .features { position:relative; z-index:1; padding:80px 24px; max-width:1200px; margin:0 auto; }
+    .features-heading { text-align:center; margin-bottom:60px; }
+    .features-heading h2 { font-size:2rem; font-weight:800; margin-bottom:12px; }
+    .features-heading p { color:var(--text-secondary); max-width:500px; margin:0 auto; }
+    .features-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px; }
+    .feature-card { background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:32px; transition:all .3s ease; }
+    .feature-card:hover { border-color:var(--border-glow); transform:translateY(-4px); box-shadow:0 0 30px rgba(0,229,255,0.15); }
+    .feature-icon { width:48px; height:48px; border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:16px; }
+    .fi-cyan { background:rgba(0,229,255,0.1); }
+    .fi-mag { background:rgba(255,45,120,0.1); }
+    .fi-ora { background:rgba(255,107,43,0.1); }
+    .feature-card h3 { font-size:1.15rem; font-weight:700; margin-bottom:8px; }
+    .feature-card p { font-size:0.9rem; color:var(--text-secondary); line-height:1.6; }
+
+    .how-it-works { position:relative; z-index:1; padding:80px 24px; max-width:800px; margin:0 auto; text-align:center; }
+    .how-it-works h2 { font-size:2rem; font-weight:800; margin-bottom:48px; }
+    .steps { display:flex; flex-direction:column; gap:32px; }
+    .step { display:flex; align-items:flex-start; gap:20px; text-align:left; }
+    .step-number { flex-shrink:0; width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,var(--accent-cyan),var(--accent-magenta)); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.1rem; color:var(--bg-deep); }
+    .step-content h3 { font-size:1.1rem; font-weight:700; margin-bottom:4px; }
+    .step-content p { color:var(--text-secondary); font-size:0.9rem; }
+
+    .cta-section { position:relative; z-index:1; text-align:center; padding:100px 24px; }
+    .cta-box { max-width:600px; margin:0 auto; background:linear-gradient(135deg,rgba(0,229,255,0.06),rgba(255,45,120,0.06)); border:1px solid rgba(0,229,255,0.15); border-radius:var(--radius-xl); padding:60px 40px; }
+    .cta-box h2 { font-size:2rem; font-weight:800; margin-bottom:12px; }
+    .cta-box p { color:var(--text-secondary); margin-bottom:32px; }
+
+    .footer { position:relative; z-index:1; text-align:center; padding:40px 24px; border-top:1px solid var(--border-subtle); color:var(--text-muted); font-size:0.85rem; }
+
+    .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); z-index:200; align-items:center; justify-content:center; padding:24px; }
+    .modal-overlay.show { display:flex; }
+    .modal { background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-xl); padding:40px; width:100%; max-width:440px; position:relative; animation:modalIn .3s ease; }
+    @keyframes modalIn { from{opacity:0;transform:scale(.95) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)} }
+    .modal-close { position:absolute; top:16px; right:16px; background:none; border:none; color:var(--text-muted); font-size:1.5rem; cursor:pointer; padding:4px; line-height:1; }
+    .modal-close:hover { color:var(--text-primary); }
+    .modal h2 { font-size:1.5rem; font-weight:800; margin-bottom:4px; }
+    .modal .modal-sub { color:var(--text-secondary); font-size:0.9rem; margin-bottom:28px; }
+    .modal-toggle { text-align:center; margin-top:20px; font-size:0.9rem; color:var(--text-secondary); }
+    .modal-toggle a { cursor:pointer; font-weight:600; }
+    .form-error { color:var(--accent-magenta); font-size:0.85rem; margin-top:8px; display:none; }
+    .form-error.show { display:block; }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">V<span>-</span>KIKS</a>
+      <div class="nav-links" id="navLinks">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#how-it-works" class="nav-link">How It Works</a>
+        <button class="btn btn-sm btn-secondary" onclick="openAuth('login')">Log In</button>
+        <button class="btn btn-sm btn-primary" onclick="openAuth('signup')">Sign Up Free</button>
+      </div>
+      <button class="nav-hamburger" onclick="toggleNav()">☰</button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-badge">⚡ Now in Early Access</div>
+    <h1>Share the<br><span class="gradient-text">Experience</span></h1>
+    <p class="hero-tagline">Get your kicks, vicariously.</p>
+    <p class="hero-sub">Find people to watch movies, binge shows, catch live events, and share experiences together — even when you're miles apart.</p>
+    <div class="hero-actions">
+      <button class="btn btn-lg btn-primary" onclick="openAuth('signup')">Start Sharing ⚡</button>
+      <a href="#how-it-works" class="btn btn-lg btn-secondary">See How It Works</a>
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <div class="features-heading">
+      <h2>Built for Shared Moments</h2>
+      <p>Everything you need to find your people and share experiences together.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card"><div class="feature-icon fi-cyan">📡</div><h3>Post Experiences</h3><p>Create a post for anything — watching Interstellar tonight, catching the big game, binging a new series. Set the time, platform, and max group size.</p></div>
+      <div class="feature-card"><div class="feature-icon fi-mag">🔍</div><h3>Find Your Crew</h3><p>Browse upcoming experiences by category. Movies, TV, sports, gaming, travel — filter by what excites you and join in one click.</p></div>
+      <div class="feature-card"><div class="feature-icon fi-cyan">👥</div><h3>Connect &amp; Share</h3><p>See who's joining, build your profile, and track the experiences you've shared. Every kick is better with others.</p></div>
+      <div class="feature-card"><div class="feature-icon fi-ora">🎯</div><h3>Tag &amp; Discover</h3><p>Posts are tagged by category so you can find exactly what you're looking for — or stumble onto something unexpected.</p></div>
+      <div class="feature-card"><div class="feature-icon fi-mag">📱</div><h3>Works Everywhere</h3><p>Fully mobile-friendly. Post from your couch, join from your phone, share from anywhere in the world.</p></div>
+      <div class="feature-card"><div class="feature-icon fi-cyan">🔒</div><h3>Your Space</h3><p>Build your profile, control your posts, and manage who joins. It's your experience to share on your terms.</p></div>
+    </div>
+  </section>
+
+  <section class="how-it-works" id="how-it-works">
+    <h2>How It Works</h2>
+    <div class="steps">
+      <div class="step"><div class="step-number">1</div><div class="step-content"><h3>Sign up in seconds</h3><p>Create your free account with just an email and password. You're in.</p></div></div>
+      <div class="step"><div class="step-number">2</div><div class="step-content"><h3>Post or browse experiences</h3><p>Create a post for something you're watching or doing, or browse what others have planned and find something that excites you.</p></div></div>
+      <div class="step"><div class="step-number">3</div><div class="step-content"><h3>Join up and connect</h3><p>Click join on any experience that speaks to you. See who else is in, and get your kicks — vicariously.</p></div></div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <div class="cta-box">
+      <h2>Ready to Get Your Kicks?</h2>
+      <p>Join the community of people sharing experiences together. It's free.</p>
+      <button class="btn btn-lg btn-primary" onclick="openAuth('signup')">Create Free Account ⚡</button>
+    </div>
+  </section>
+
+  <footer class="footer"><p>© 2025 V-Kiks. Get your kicks, vicariously. ⚡</p></footer>
+
+  <div class="modal-overlay" id="authModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeAuth()">×</button>
+      <div id="signupForm">
+        <h2>Join V-Kiks ⚡</h2>
+        <p class="modal-sub">Create your account and start sharing experiences.</p>
+        <div class="form-group"><label for="signupUsername">Username</label><input type="text" id="signupUsername" class="form-input" placeholder="your_username"></div>
+        <div class="form-group"><label for="signupEmail">Email</label><input type="email" id="signupEmail" class="form-input" placeholder="you@email.com"></div>
+        <div class="form-group"><label for="signupPassword">Password</label><input type="password" id="signupPassword" class="form-input" placeholder="Min 6 characters"></div>
+        <div class="form-error" id="signupError"></div>
+        <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="handleSignup()" id="signupBtn">Create Account</button>
+        <div class="modal-toggle">Already have an account? <a onclick="switchAuth('login')">Log in</a></div>
+      </div>
+      <div id="loginForm" style="display:none;">
+        <h2>Welcome Back ⚡</h2>
+        <p class="modal-sub">Log in to find and share experiences.</p>
+        <div class="form-group"><label for="loginEmail">Email</label><input type="email" id="loginEmail" class="form-input" placeholder="you@email.com"></div>
+        <div class="form-group"><label for="loginPassword">Password</label><input type="password" id="loginPassword" class="form-input" placeholder="Your password"></div>
+        <div class="form-error" id="loginError"></div>
+        <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="handleLogin()" id="loginBtn">Log In</button>
+        <div class="modal-toggle">Don't have an account? <a onclick="switchAuth('signup')">Sign up free</a></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // =============================================
+    // ⚠️  PASTE YOUR SUPABASE CREDENTIALS BELOW  ⚠️
+    // =============================================
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    (async () => {
+      try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (session) window.location.href = '/app.html';
+      } catch(e) {}
+    })();
+
+    function toggleNav() { document.getElementById('navLinks').classList.toggle('open'); }
+    function openAuth(type) { document.getElementById('authModal').classList.add('show'); switchAuth(type); }
+    function closeAuth() { document.getElementById('authModal').classList.remove('show'); clearErrors(); }
+    function switchAuth(type) {
+      document.getElementById('signupForm').style.display = type === 'signup' ? 'block' : 'none';
+      document.getElementById('loginForm').style.display = type === 'login' ? 'block' : 'none';
+      clearErrors();
+    }
+    function clearErrors() { document.querySelectorAll('.form-error').forEach(el => { el.classList.remove('show'); el.textContent = ''; }); }
+    function showError(id, msg) { const el = document.getElementById(id); el.textContent = msg; el.classList.add('show'); }
+
+    async function handleSignup() {
+      const btn = document.getElementById('signupBtn');
+      const username = document.getElementById('signupUsername').value.trim();
+      const email = document.getElementById('signupEmail').value.trim();
+      const password = document.getElementById('signupPassword').value;
+      if (!username || !email || !password) { showError('signupError','Please fill in all fields.'); return; }
+      if (username.length < 3) { showError('signupError','Username must be at least 3 characters.'); return; }
+      if (password.length < 6) { showError('signupError','Password must be at least 6 characters.'); return; }
+      btn.disabled = true; btn.textContent = 'Creating account...';
+      const { data, error } = await sb.auth.signUp({ email, password, options: { data: { username, display_name: username } } });
+      if (error) { showError('signupError', error.message); btn.disabled = false; btn.textContent = 'Create Account'; return; }
+      if (data.user && !data.session) {
+        document.getElementById('signupForm').innerHTML = '<div style="text-align:center;padding:20px 0;"><div style="font-size:3rem;margin-bottom:16px;">📧</div><h2>Check Your Email</h2><p class="modal-sub">We sent a confirmation link to <strong>'+email+'</strong>. Click it to activate your account, then come back and log in.</p><button class="btn btn-secondary" style="margin-top:16px;" onclick="switchAuth(\'login\')">Go to Login</button></div>';
+      } else if (data.session) { window.location.href = '/app.html'; }
+    }
+
+    async function handleLogin() {
+      const btn = document.getElementById('loginBtn');
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      if (!email || !password) { showError('loginError','Please fill in all fields.'); return; }
+      btn.disabled = true; btn.textContent = 'Logging in...';
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) { showError('loginError', error.message); btn.disabled = false; btn.textContent = 'Log In'; return; }
+      window.location.href = '/app.html';
+    }
+
+    document.getElementById('authModal').addEventListener('click', function(e) { if (e.target === this) closeAuth(); });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeAuth(); });
+  </script>
+</body>
+</html>

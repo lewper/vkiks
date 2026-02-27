@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V-Kiks — App</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #06060e;
+      --bg-surface: #0d0d1a;
+      --bg-card: #12122a;
+      --bg-card-hover: #1a1a3a;
+      --bg-input: #0f0f24;
+      --accent-cyan: #00e5ff;
+      --accent-magenta: #ff2d78;
+      --accent-orange: #ff6b2b;
+      --accent-purple: #8b5cf6;
+      --accent-green: #22c55e;
+      --text-primary: #f0f0f8;
+      --text-secondary: #8888aa;
+      --text-muted: #555577;
+      --border-subtle: rgba(255,255,255,0.06);
+      --border-glow: rgba(0,229,255,0.2);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --font-display: 'Outfit', sans-serif;
+      --font-mono: 'Space Mono', monospace;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; -webkit-font-smoothing:antialiased; }
+    body { font-family:var(--font-display); background:var(--bg-deep); color:var(--text-primary); line-height:1.6; min-height:100vh; overflow-x:hidden; }
+    a { color:var(--accent-cyan); text-decoration:none; transition:color .2s; }
+    a:hover { color:#66f0ff; }
+
+    .bg-grid { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; background-image:linear-gradient(rgba(0,229,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,0.03) 1px,transparent 1px); background-size:60px 60px; }
+    .bg-glow { position:fixed; border-radius:50%; filter:blur(120px); pointer-events:none; z-index:0; }
+    .bg-glow-1 { width:600px; height:600px; background:rgba(0,229,255,0.06); top:-200px; right:-100px; animation:float 20s ease-in-out infinite; }
+    .bg-glow-2 { width:500px; height:500px; background:rgba(255,45,120,0.05); bottom:-200px; left:-100px; animation:float 25s ease-in-out infinite reverse; }
+    @keyframes float { 0%,100%{transform:translate(0,0)} 33%{transform:translate(30px,-30px)} 66%{transform:translate(-20px,20px)} }
+
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 28px; border-radius:var(--radius-md); font-family:var(--font-display); font-weight:600; font-size:0.95rem; border:none; cursor:pointer; transition:all .25s ease; text-decoration:none; white-space:nowrap; }
+    .btn-primary { background:linear-gradient(135deg,var(--accent-cyan),#00b8d4); color:var(--bg-deep); box-shadow:0 0 20px rgba(0,229,255,0.25); }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 0 35px rgba(0,229,255,0.4); color:var(--bg-deep); }
+    .btn-secondary { background:transparent; color:var(--text-primary); border:1px solid rgba(255,255,255,0.15); }
+    .btn-secondary:hover { border-color:var(--accent-cyan); color:var(--accent-cyan); background:rgba(0,229,255,0.05); }
+    .btn-magenta { background:linear-gradient(135deg,var(--accent-magenta),#e0195f); color:white; box-shadow:0 0 20px rgba(255,45,120,0.25); }
+    .btn-magenta:hover { transform:translateY(-2px); box-shadow:0 0 35px rgba(255,45,120,0.4); }
+    .btn-sm { padding:8px 18px; font-size:0.85rem; }
+    .btn-lg { padding:16px 36px; font-size:1.1rem; }
+    .btn:disabled { opacity:0.4; cursor:not-allowed; transform:none !important; }
+
+    .form-group { margin-bottom:20px; }
+    .form-group label { display:block; font-size:0.85rem; font-weight:500; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; }
+    .form-input, .form-select, .form-textarea { width:100%; padding:12px 16px; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); color:var(--text-primary); font-family:var(--font-display); font-size:0.95rem; transition:border-color .2s,box-shadow .2s; outline:none; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color:var(--accent-cyan); box-shadow:0 0 0 3px rgba(0,229,255,0.1); }
+    .form-input::placeholder, .form-textarea::placeholder { color:var(--text-muted); }
+    .form-textarea { min-height:100px; resize:vertical; }
+    .form-select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238888aa' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; padding-right:36px; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media(max-width:480px) { .form-row { grid-template-columns:1fr; } }
+    .form-error { color:var(--accent-magenta); font-size:0.85rem; margin-top:8px; display:none; }
+    .form-error.show { display:block; }
+
+    .nav { position:sticky; top:0; z-index:100; background:rgba(6,6,14,0.85); backdrop-filter:blur(20px); border-bottom:1px solid var(--border-subtle); padding:0 24px; }
+    .nav-inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; height:64px; }
+    .nav-logo { font-family:var(--font-mono); font-size:1.3rem; font-weight:700; color:var(--text-primary); letter-spacing:-0.5px; cursor:pointer; }
+    .nav-logo span { color:var(--accent-cyan); }
+    .nav-links { display:flex; align-items:center; gap:8px; }
+    .nav-link { padding:8px 16px; border-radius:var(--radius-sm); font-size:0.9rem; font-weight:500; color:var(--text-secondary); transition:all .2s; cursor:pointer; border:none; background:none; font-family:var(--font-display); }
+    .nav-link:hover, .nav-link.active { color:var(--text-primary); background:rgba(255,255,255,0.05); }
+    .nav-link.active { color:var(--accent-cyan); }
+    .nav-hamburger { display:none; background:none; border:none; color:var(--text-primary); font-size:1.5rem; cursor:pointer; padding:8px; }
+    @media(max-width:768px) {
+      .nav-hamburger { display:block; }
+      .nav-links { display:none; position:absolute; top:64px; left:0; right:0; background:rgba(6,6,14,0.95); backdrop-filter:blur(20px); flex-direction:column; padding:16px; border-bottom:1px solid var(--border-subtle); }
+      .nav-links.open { display:flex; }
+      .nav-link { width:100%; text-align:left; padding:12px 16px; }
+    }
+
+    .app-content { position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:32px 24px 80px; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; flex-wrap:wrap; gap:16px; }
+    .page-header h1 { font-size:1.8rem; font-weight:800; }
+
+    .filter-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px; }
+    .filter-btn { padding:8px 16px; border-radius:100px; font-family:var(--font-display); font-size:0.8rem; font-weight:600; border:1px solid var(--border-subtle); background:transparent; color:var(--text-secondary); cursor:pointer; transition:all .2s; text-transform:uppercase; letter-spacing:0.3px; }
+    .filter-btn:hover { border-color:var(--accent-cyan); color:var(--accent-cyan); }
+    .filter-btn.active { background:rgba(0,229,255,0.1); border-color:var(--accent-cyan); color:var(--accent-cyan); }
+
+    .posts-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:20px; }
+    @media(max-width:480px) { .posts-grid { grid-template-columns:1fr; } }
+
+    .post-card { background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px; transition:all .3s ease; display:flex; flex-direction:column; cursor:pointer; }
+    .post-card:hover { border-color:var(--border-glow); box-shadow:0 0 30px rgba(0,229,255,0.15); transform:translateY(-2px); }
+    .post-card-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; gap:12px; }
+    .post-card-title { font-size:1.15rem; font-weight:700; line-height:1.3; }
+    .post-card-experience { font-size:0.95rem; color:var(--accent-cyan); font-weight:500; margin-bottom:8px; }
+    .post-card-desc { font-size:0.88rem; color:var(--text-secondary); margin-bottom:16px; line-height:1.5; flex-grow:1; }
+    .post-card-meta { display:flex; flex-wrap:wrap; gap:12px; font-size:0.82rem; color:var(--text-muted); margin-bottom:16px; padding-top:16px; border-top:1px solid var(--border-subtle); }
+    .post-card-meta-item { display:flex; align-items:center; gap:5px; }
+    .post-card-footer { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .post-card-participants { display:flex; align-items:center; gap:8px; font-size:0.85rem; color:var(--text-secondary); }
+    .participant-dots { display:flex; }
+    .participant-dot { width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,var(--accent-purple),var(--accent-cyan)); border:2px solid var(--bg-card); margin-left:-8px; display:flex; align-items:center; justify-content:center; font-size:0.65rem; font-weight:700; }
+    .participant-dot:first-child { margin-left:0; }
+
+    .tag { display:inline-flex; align-items:center; gap:4px; padding:4px 12px; border-radius:100px; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+    .tag-movies { background:rgba(139,92,246,0.15); color:var(--accent-purple); border:1px solid rgba(139,92,246,0.3); }
+    .tag-tv { background:rgba(0,229,255,0.1); color:var(--accent-cyan); border:1px solid rgba(0,229,255,0.25); }
+    .tag-travel { background:rgba(255,107,43,0.12); color:var(--accent-orange); border:1px solid rgba(255,107,43,0.3); }
+    .tag-sports { background:rgba(34,197,94,0.12); color:var(--accent-green); border:1px solid rgba(34,197,94,0.3); }
+    .tag-gaming { background:rgba(255,45,120,0.12); color:var(--accent-magenta); border:1px solid rgba(255,45,120,0.3); }
+    .tag-other { background:rgba(255,255,255,0.06); color:var(--text-secondary); border:1px solid rgba(255,255,255,0.1); }
+
+    .create-post-section { max-width:640px; margin:0 auto; }
+    .create-post-section h1 { font-size:1.8rem; font-weight:800; margin-bottom:8px; }
+    .form-subtitle { color:var(--text-secondary); margin-bottom:32px; }
+
+    .profile-header { display:flex; align-items:center; gap:24px; margin-bottom:40px; flex-wrap:wrap; }
+    .profile-avatar { width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg,var(--accent-cyan),var(--accent-magenta)); display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:800; flex-shrink:0; }
+    .profile-info h1 { font-size:1.6rem; font-weight:800; }
+    .profile-username { color:var(--text-secondary); font-size:0.9rem; }
+    .profile-bio { color:var(--text-secondary); font-size:0.9rem; margin-top:4px; }
+    .profile-stats { display:flex; gap:24px; margin-top:8px; }
+    .profile-stat { font-size:0.85rem; color:var(--text-secondary); }
+    .profile-stat strong { color:var(--text-primary); font-weight:700; }
+    .profile-tabs { display:flex; gap:4px; margin-bottom:24px; border-bottom:1px solid var(--border-subtle); }
+    .profile-tab { padding:12px 20px; border:none; background:none; color:var(--text-secondary); font-family:var(--font-display); font-size:0.9rem; font-weight:500; cursor:pointer; border-bottom:2px solid transparent; transition:all .2s; }
+    .profile-tab:hover { color:var(--text-primary); }
+    .profile-tab.active { color:var(--accent-cyan); border-bottom-color:var(--accent-cyan); }
+
+    .empty-state { text-align:center; padding:60px 24px; color:var(--text-muted); }
+    .empty-state-icon { font-size:3rem; margin-bottom:16px; }
+    .empty-state h3 { font-size:1.2rem; color:var(--text-secondary); margin-bottom:8px; }
+    .empty-state p { max-width:400px; margin:0 auto 24px; font-size:0.9rem; }
+
+    .toast { position:fixed; bottom:24px; right:24px; padding:14px 24px; border-radius:var(--radius-md); font-size:0.9rem; font-weight:500; z-index:300; animation:slideInRight .3s ease; max-width:400px; }
+    .toast-success { background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.3); color:var(--accent-green); }
+    .toast-error { background:rgba(255,45,120,0.15); border:1px solid rgba(255,45,120,0.3); color:var(--accent-magenta); }
+    @keyframes slideInRight { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+
+    .spinner { width:24px; height:24px; border:3px solid var(--border-subtle); border-top-color:var(--accent-cyan); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .loading-section { text-align:center; padding:60px; }
+
+    .view { display:none; }
+    .view.active { display:block; }
+
+    .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); z-index:200; align-items:center; justify-content:center; padding:24px; }
+    .modal-overlay.show { display:flex; }
+    .modal { background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-xl); padding:40px; width:100%; max-width:560px; position:relative; animation:modalIn .3s ease; max-height:90vh; overflow-y:auto; }
+    @keyframes modalIn { from{opacity:0;transform:scale(.95) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)} }
+    .modal-close { position:absolute; top:16px; right:16px; background:none; border:none; color:var(--text-muted); font-size:1.5rem; cursor:pointer; padding:4px; line-height:1; }
+    .modal-close:hover { color:var(--text-primary); }
+
+    .text-muted { color:var(--text-muted); }
+    .mt-2 { margin-top:8px; }
+    .mb-4 { margin-bottom:16px; }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-logo" onclick="showView('browse')">V<span>-</span>KIKS</div>
+      <div class="nav-links" id="navLinks">
+        <button class="nav-link active" data-view="browse" onclick="showView('browse')">🔍 Browse</button>
+        <button class="nav-link" data-view="create" onclick="showView('create')">✚ Create</button>
+        <button class="nav-link" data-view="profile" onclick="showView('profile')">👤 Profile</button>
+        <button class="btn btn-sm btn-secondary" onclick="handleLogout()">Log Out</button>
+      </div>
+      <button class="nav-hamburger" onclick="toggleNav()">☰</button>
+    </div>
+  </nav>
+
+  <!-- BROWSE VIEW -->
+  <div class="view active" id="view-browse">
+    <div class="app-content">
+      <div class="page-header">
+        <h1>Upcoming Experiences ⚡</h1>
+        <button class="btn btn-primary btn-sm" onclick="showView('create')">＋ New Post</button>
+      </div>
+      <div class="filter-bar" id="filterBar">
+        <button class="filter-btn active" data-tag="all" onclick="filterPosts('all')">All</button>
+        <button class="filter-btn" data-tag="movies" onclick="filterPosts('movies')">🎬 Movies</button>
+        <button class="filter-btn" data-tag="tv" onclick="filterPosts('tv')">📺 TV</button>
+        <button class="filter-btn" data-tag="sports" onclick="filterPosts('sports')">🏟️ Sports</button>
+        <button class="filter-btn" data-tag="gaming" onclick="filterPosts('gaming')">🎮 Gaming</button>
+        <button class="filter-btn" data-tag="travel" onclick="filterPosts('travel')">✈️ Travel</button>
+        <button class="filter-btn" data-tag="other" onclick="filterPosts('other')">🌀 Other</button>
+      </div>
+      <div id="postsContainer">
+        <div class="loading-section"><div class="spinner"></div><p class="mt-2 text-muted">Loading experiences...</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREATE VIEW -->
+  <div class="view" id="view-create">
+    <div class="app-content">
+      <div class="create-post-section">
+        <h1>Share an Experience ⚡</h1>
+        <p class="form-subtitle">Create a post so others can join you.</p>
+        <div class="form-group"><label for="postTitle">Title</label><input type="text" id="postTitle" class="form-input" placeholder="e.g. Interstellar Watch Party"></div>
+        <div class="form-group"><label for="postExperience">What are you watching / doing?</label><input type="text" id="postExperience" class="form-input" placeholder="e.g. Interstellar (2014)"></div>
+        <div class="form-group"><label for="postDescription">Description</label><textarea id="postDescription" class="form-textarea" placeholder="Tell people what to expect, any context, hype them up..."></textarea></div>
+        <div class="form-row">
+          <div class="form-group"><label for="postDate">Date &amp; Time</label><input type="datetime-local" id="postDate" class="form-input"></div>
+          <div class="form-group"><label for="postTag">Category</label>
+            <select id="postTag" class="form-select">
+              <option value="movies">🎬 Movies</option><option value="tv">📺 TV</option><option value="sports">🏟️ Sports</option>
+              <option value="gaming">🎮 Gaming</option><option value="travel">✈️ Travel</option><option value="other">🌀 Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label for="postPlatform">Platform</label><input type="text" id="postPlatform" class="form-input" placeholder="e.g. Netflix, Discord, Twitch"></div>
+          <div class="form-group"><label for="postMax">Max Participants</label><input type="number" id="postMax" class="form-input" value="10" min="2" max="100"></div>
+        </div>
+        <div class="form-group"><label for="postLink">Link (optional)</label><input type="url" id="postLink" class="form-input" placeholder="e.g. https://discord.gg/invite-link"></div>
+        <div class="form-error" id="createError"></div>
+        <button class="btn btn-primary btn-lg" style="width:100%;margin-top:8px;" onclick="handleCreatePost()" id="createBtn">Post Experience ⚡</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE VIEW -->
+  <div class="view" id="view-profile">
+    <div class="app-content">
+      <div id="profileContainer"><div class="loading-section"><div class="spinner"></div><p class="mt-2 text-muted">Loading profile...</p></div></div>
+    </div>
+  </div>
+
+  <!-- POST DETAIL MODAL -->
+  <div class="modal-overlay" id="postDetailModal">
+    <div class="modal"><button class="modal-close" onclick="closePostDetail()">×</button><div id="postDetailContent"></div></div>
+  </div>
+
+  <div id="toastContainer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // =============================================
+    // ⚠️  PASTE YOUR SUPABASE CREDENTIALS BELOW  ⚠️
+    // =============================================
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let currentUser = null;
+    let currentProfile = null;
+    let allPosts = [];
+    let currentFilter = 'all';
+
+    // === INIT ===
+    (async () => {
+      try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { window.location.href = '/'; return; }
+        currentUser = session.user;
+        const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+        currentProfile = profile;
+        loadPosts();
+      } catch(e) {
+        console.error('Init error:', e);
+      }
+    })();
+
+    sb.auth.onAuthStateChange((event, session) => { if (!session) window.location.href = '/'; });
+
+    // === NAV ===
+    function toggleNav() { document.getElementById('navLinks').classList.toggle('open'); }
+
+    function showView(view) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById('view-' + view).classList.add('active');
+      document.querySelectorAll('.nav-link[data-view]').forEach(btn => btn.classList.toggle('active', btn.dataset.view === view));
+      document.getElementById('navLinks').classList.remove('open');
+      if (view === 'browse') loadPosts();
+      if (view === 'profile') loadProfile();
+    }
+
+    // === BROWSE ===
+    async function loadPosts() {
+      const container = document.getElementById('postsContainer');
+      const { data: posts, error } = await sb
+        .from('posts')
+        .select('*, profiles:user_id(username, display_name), post_joins(id, user_id, profiles:user_id(username, display_name))')
+        .gte('event_date', new Date().toISOString())
+        .order('event_date', { ascending: true });
+
+      if (error) { container.innerHTML = '<div class="empty-state"><p>Error loading posts. Please try again.</p></div>'; return; }
+      allPosts = posts || [];
+      renderPosts();
+    }
+
+    function renderPosts() {
+      const container = document.getElementById('postsContainer');
+      let filtered = currentFilter === 'all' ? allPosts : allPosts.filter(p => p.tag === currentFilter);
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🌌</div><h3>No experiences yet</h3><p>Be the first to post something! Create an experience and invite others to join.</p><button class="btn btn-primary" onclick="showView(\'create\')">Create First Post ⚡</button></div>';
+        return;
+      }
+      container.innerHTML = '<div class="posts-grid">' + filtered.map(renderPostCard).join('') + '</div>';
+    }
+
+    function renderPostCard(post) {
+      const date = new Date(post.event_date);
+      const dateStr = date.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+      const timeStr = date.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+      const joinCount = post.post_joins ? post.post_joins.length : 0;
+      const spotsLeft = post.max_participants - joinCount;
+      const hasJoined = post.post_joins?.some(j => j.user_id === currentUser?.id);
+      const isAuthor = post.user_id === currentUser?.id;
+
+      const dots = (post.post_joins || []).slice(0, 4).map(j => {
+        const i = (j.profiles?.display_name || j.profiles?.username || '?')[0].toUpperCase();
+        return '<div class="participant-dot">' + i + '</div>';
+      }).join('');
+
+      let spotsBadge = '';
+      if (spotsLeft <= 3 && spotsLeft > 0) spotsBadge = '<span style="font-size:0.75rem;color:var(--accent-orange);">🔥 ' + spotsLeft + ' spots left</span>';
+      if (spotsLeft <= 0) spotsBadge = '<span style="font-size:0.75rem;color:var(--accent-magenta);">Full</span>';
+
+      let actionBtn = '';
+      if (!isAuthor && !hasJoined && spotsLeft > 0) actionBtn = '<button class="btn btn-sm btn-primary" onclick="event.stopPropagation();joinPost(\'' + post.id + '\')">Join ⚡</button>';
+      else if (hasJoined) actionBtn = '<span class="tag tag-tv" style="font-size:0.8rem;">✓ Joined</span>';
+      else if (isAuthor) actionBtn = '<span style="font-size:0.8rem;color:var(--text-muted);">Your post</span>';
+
+      return '<div class="post-card" onclick="openPostDetail(\'' + post.id + '\')">' +
+        '<div class="post-card-header"><span class="tag tag-' + post.tag + '">' + getTagEmoji(post.tag) + ' ' + post.tag + '</span>' + spotsBadge + '</div>' +
+        '<div class="post-card-title">' + esc(post.title) + '</div>' +
+        '<div class="post-card-experience">' + esc(post.experience_type) + '</div>' +
+        '<div class="post-card-desc">' + esc((post.description || '').substring(0, 120)) + ((post.description || '').length > 120 ? '...' : '') + '</div>' +
+        '<div class="post-card-meta"><span class="post-card-meta-item">📅 ' + dateStr + '</span><span class="post-card-meta-item">🕐 ' + timeStr + '</span>' + (post.platform ? '<span class="post-card-meta-item">📡 ' + esc(post.platform) + '</span>' : '') + '</div>' +
+        '<div class="post-card-footer"><div class="post-card-participants"><div class="participant-dots">' + dots + '</div><span>' + joinCount + '/' + post.max_participants + ' joined</span></div>' + actionBtn + '</div></div>';
+    }
+
+    // === FILTERS ===
+    function filterPosts(tag) {
+      currentFilter = tag;
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tag === tag));
+      renderPosts();
+    }
+
+    // === JOIN / LEAVE ===
+    async function joinPost(postId) {
+      const { error } = await sb.from('post_joins').insert({ post_id: postId, user_id: currentUser.id });
+      if (error) { showToast(error.code === '23505' ? 'You already joined!' : 'Error joining.', 'error'); return; }
+      showToast('You joined the experience! ⚡', 'success');
+      loadPosts();
+    }
+
+    async function leavePost(postId) {
+      const { error } = await sb.from('post_joins').delete().eq('post_id', postId).eq('user_id', currentUser.id);
+      if (error) { showToast('Error leaving.', 'error'); return; }
+      showToast('You left the experience.', 'success');
+      loadPosts(); closePostDetail();
+    }
+
+    // === POST DETAIL ===
+    function openPostDetail(postId) {
+      const post = allPosts.find(p => p.id === postId);
+      if (!post) return;
+      const date = new Date(post.event_date);
+      const dateStr = date.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+      const timeStr = date.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit', timeZoneName:'short' });
+      const joinCount = post.post_joins?.length || 0;
+      const hasJoined = post.post_joins?.some(j => j.user_id === currentUser?.id);
+      const isAuthor = post.user_id === currentUser?.id;
+      const spotsLeft = post.max_participants - joinCount;
+
+      const joinList = (post.post_joins || []).map(j =>
+        '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;"><div class="participant-dot" style="margin:0;width:32px;height:32px;font-size:0.75rem;">' +
+        (j.profiles?.display_name || '?')[0].toUpperCase() + '</div><span style="font-size:0.9rem;">' +
+        esc(j.profiles?.display_name || j.profiles?.username || 'Unknown') + '</span></div>'
+      ).join('');
+
+      let actionHtml = '';
+      if (!isAuthor && !hasJoined && spotsLeft > 0) actionHtml = '<button class="btn btn-primary" style="flex:1;" onclick="joinPost(\'' + post.id + '\');closePostDetail();">Join Experience ⚡</button>';
+      else if (hasJoined) actionHtml = '<button class="btn btn-secondary" style="flex:1;" onclick="leavePost(\'' + post.id + '\')">Leave Experience</button>';
+      else if (isAuthor) actionHtml = '<button class="btn btn-magenta btn-sm" onclick="deletePost(\'' + post.id + '\')">Delete Post</button>';
+      else if (spotsLeft <= 0) actionHtml = '<button class="btn btn-secondary" disabled style="flex:1;">Full — No Spots Left</button>';
+
+      document.getElementById('postDetailContent').innerHTML =
+        '<span class="tag tag-' + post.tag + '" style="margin-bottom:16px;display:inline-flex;">' + getTagEmoji(post.tag) + ' ' + post.tag + '</span>' +
+        '<h2 style="font-size:1.4rem;font-weight:800;margin-bottom:4px;">' + esc(post.title) + '</h2>' +
+        '<p style="color:var(--accent-cyan);font-weight:500;margin-bottom:12px;">' + esc(post.experience_type) + '</p>' +
+        '<p style="color:var(--text-secondary);font-size:0.9rem;line-height:1.6;margin-bottom:20px;">' + esc(post.description || 'No description.') + '</p>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">' +
+          '<div style="background:var(--bg-input);padding:12px;border-radius:var(--radius-sm);"><div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Date</div><div style="font-size:0.9rem;">' + dateStr + '</div></div>' +
+          '<div style="background:var(--bg-input);padding:12px;border-radius:var(--radius-sm);"><div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Time</div><div style="font-size:0.9rem;">' + timeStr + '</div></div>' +
+          (post.platform ? '<div style="background:var(--bg-input);padding:12px;border-radius:var(--radius-sm);"><div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Platform</div><div style="font-size:0.9rem;">' + esc(post.platform) + '</div></div>' : '') +
+          '<div style="background:var(--bg-input);padding:12px;border-radius:var(--radius-sm);"><div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Spots</div><div style="font-size:0.9rem;">' + joinCount + '/' + post.max_participants + (spotsLeft <= 3 && spotsLeft > 0 ? ' 🔥' : '') + '</div></div>' +
+        '</div>' +
+        (post.external_link ? '<a href="' + esc(post.external_link) + '" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="margin-bottom:20px;">🔗 Open Link</a>' : '') +
+        '<div style="border-top:1px solid var(--border-subtle);padding-top:16px;margin-bottom:16px;"><div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Who\'s Joining (' + joinCount + ')</div>' +
+        (joinList || '<p style="color:var(--text-muted);font-size:0.9rem;">No one yet — be the first!</p>') + '</div>' +
+        '<div style="display:flex;gap:12px;">' + actionHtml + '</div>' +
+        '<div style="margin-top:12px;font-size:0.8rem;color:var(--text-muted);">Posted by ' + esc(post.profiles?.display_name || post.profiles?.username || 'Unknown') + '</div>';
+
+      document.getElementById('postDetailModal').classList.add('show');
+    }
+
+    function closePostDetail() { document.getElementById('postDetailModal').classList.remove('show'); }
+
+    // === DELETE ===
+    async function deletePost(postId) {
+      if (!confirm('Are you sure you want to delete this post?')) return;
+      const { error } = await sb.from('posts').delete().eq('id', postId).eq('user_id', currentUser.id);
+      if (error) { showToast('Error deleting post.', 'error'); return; }
+      showToast('Post deleted.', 'success');
+      closePostDetail(); loadPosts();
+    }
+
+    // === CREATE POST ===
+    async function handleCreatePost() {
+      const btn = document.getElementById('createBtn');
+      const title = document.getElementById('postTitle').value.trim();
+      const experience = document.getElementById('postExperience').value.trim();
+      const description = document.getElementById('postDescription').value.trim();
+      const eventDate = document.getElementById('postDate').value;
+      const tag = document.getElementById('postTag').value;
+      const platform = document.getElementById('postPlatform').value.trim();
+      const maxParticipants = parseInt(document.getElementById('postMax').value) || 10;
+      const externalLink = document.getElementById('postLink').value.trim();
+
+      if (!title || !experience || !eventDate) { showError('createError', 'Title, experience, and date are required.'); return; }
+      if (new Date(eventDate) < new Date()) { showError('createError', 'Event date must be in the future.'); return; }
+
+      btn.disabled = true; btn.textContent = 'Posting...';
+      const { error } = await sb.from('posts').insert({
+        user_id: currentUser.id, title, experience_type: experience, description,
+        event_date: new Date(eventDate).toISOString(), tag, platform: platform || null,
+        max_participants: maxParticipants, external_link: externalLink || null
+      });
+      btn.disabled = false; btn.textContent = 'Post Experience ⚡';
+
+      if (error) { showError('createError', 'Error creating post: ' + error.message); return; }
+
+      ['postTitle','postExperience','postDescription','postDate','postPlatform','postLink'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('postMax').value = '10';
+      document.getElementById('createError').classList.remove('show');
+      showToast('Experience posted! ⚡', 'success');
+      showView('browse');
+    }
+
+    function showError(id, msg) { const el = document.getElementById(id); el.textContent = msg; el.classList.add('show'); }
+
+    // === PROFILE ===
+    async function loadProfile() {
+      const container = document.getElementById('profileContainer');
+      const { data: myPosts } = await sb.from('posts').select('*, post_joins(id)').eq('user_id', currentUser.id).order('event_date', { ascending: false });
+      const { data: joinedPosts } = await sb.from('post_joins').select('post_id, posts:post_id(*, profiles:user_id(username, display_name), post_joins(id))').eq('user_id', currentUser.id);
+
+      const initial = (currentProfile?.display_name || currentProfile?.username || '?')[0].toUpperCase();
+      const postCount = myPosts?.length || 0;
+      const joinedCount = joinedPosts?.length || 0;
+
+      const myPostsHtml = myPosts && myPosts.length > 0
+        ? '<div class="posts-grid">' + myPosts.map(p => renderProfileCard(p, 'my')).join('') + '</div>'
+        : '<div class="empty-state"><div class="empty-state-icon">📝</div><h3>No posts yet</h3><p>Share your first experience with the community.</p><button class="btn btn-primary btn-sm" onclick="showView(\'create\')">Create a Post</button></div>';
+
+      const joinedHtml = joinedPosts && joinedPosts.length > 0
+        ? '<div class="posts-grid">' + joinedPosts.map(jp => renderProfileCard(jp.posts, 'joined')).join('') + '</div>'
+        : '<div class="empty-state"><div class="empty-state-icon">🔍</div><h3>Haven\'t joined anything yet</h3><p>Browse experiences and find something exciting.</p><button class="btn btn-primary btn-sm" onclick="showView(\'browse\')">Browse</button></div>';
+
+      container.innerHTML =
+        '<div class="profile-header"><div class="profile-avatar">' + initial + '</div><div class="profile-info"><h1>' + esc(currentProfile?.display_name || 'New Kicker') + '</h1><p class="profile-username">@' + esc(currentProfile?.username || '') + '</p>' + (currentProfile?.bio ? '<p class="profile-bio">' + esc(currentProfile.bio) + '</p>' : '') + '<div class="profile-stats"><div class="profile-stat"><strong>' + postCount + '</strong> posts</div><div class="profile-stat"><strong>' + joinedCount + '</strong> joined</div></div></div></div>' +
+        '<button class="btn btn-secondary btn-sm mb-4" onclick="showEditProfile()">✏️ Edit Profile</button>' +
+        '<div id="editProfileSection" style="display:none;margin-bottom:32px;background:var(--bg-card);padding:24px;border-radius:var(--radius-lg);border:1px solid var(--border-subtle);"><div class="form-group"><label for="editDisplayName">Display Name</label><input type="text" id="editDisplayName" class="form-input" value="' + esc(currentProfile?.display_name || '') + '"></div><div class="form-group"><label for="editBio">Bio</label><textarea id="editBio" class="form-textarea" placeholder="Tell people about yourself...">' + esc(currentProfile?.bio || '') + '</textarea></div><div style="display:flex;gap:12px;"><button class="btn btn-primary btn-sm" onclick="saveProfile()">Save</button><button class="btn btn-secondary btn-sm" onclick="document.getElementById(\'editProfileSection\').style.display=\'none\'">Cancel</button></div></div>' +
+        '<div class="profile-tabs"><button class="profile-tab active" onclick="switchProfileTab(\'my-posts\',this)">My Posts</button><button class="profile-tab" onclick="switchProfileTab(\'joined\',this)">Joined</button></div>' +
+        '<div id="profile-tab-my-posts">' + myPostsHtml + '</div>' +
+        '<div id="profile-tab-joined" style="display:none;">' + joinedHtml + '</div>';
+    }
+
+    function renderProfileCard(post, type) {
+      if (!post) return '';
+      const date = new Date(post.event_date);
+      const dateStr = date.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+      const timeStr = date.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+      const joinCount = post.post_joins?.length || 0;
+      const isPast = date < new Date();
+      return '<div class="post-card"' + (isPast ? ' style="opacity:0.6;"' : '') + '>' +
+        '<div class="post-card-header"><span class="tag tag-' + post.tag + '">' + getTagEmoji(post.tag) + ' ' + post.tag + '</span>' + (isPast ? '<span style="font-size:0.75rem;color:var(--text-muted);">Past</span>' : '') + '</div>' +
+        '<div class="post-card-title">' + esc(post.title) + '</div><div class="post-card-experience">' + esc(post.experience_type) + '</div>' +
+        '<div class="post-card-meta"><span class="post-card-meta-item">📅 ' + dateStr + '</span><span class="post-card-meta-item">🕐 ' + timeStr + '</span></div>' +
+        '<div class="post-card-footer"><span style="font-size:0.85rem;color:var(--text-secondary);">' + joinCount + '/' + post.max_participants + ' joined</span>' +
+        (type === 'my' && !isPast ? '<button class="btn btn-sm btn-secondary" onclick="deletePost(\'' + post.id + '\');loadProfile();" style="font-size:0.8rem;">Delete</button>' : '') +
+        '</div></div>';
+    }
+
+    function switchProfileTab(tab, btn) {
+      document.getElementById('profile-tab-my-posts').style.display = tab === 'my-posts' ? 'block' : 'none';
+      document.getElementById('profile-tab-joined').style.display = tab === 'joined' ? 'block' : 'none';
+      document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function showEditProfile() { document.getElementById('editProfileSection').style.display = 'block'; }
+
+    async function saveProfile() {
+      const displayName = document.getElementById('editDisplayName').value.trim();
+      const bio = document.getElementById('editBio').value.trim();
+      const { error } = await sb.from('profiles').update({ display_name: displayName || currentProfile.username, bio: bio || null }).eq('id', currentUser.id);
+      if (error) { showToast('Error saving profile.', 'error'); return; }
+      currentProfile.display_name = displayName || currentProfile.username;
+      currentProfile.bio = bio || null;
+      showToast('Profile updated! ⚡', 'success');
+      loadProfile();
+    }
+
+    // === LOGOUT ===
+    async function handleLogout() { await sb.auth.signOut(); window.location.href = '/'; }
+
+    // === UTILITIES ===
+    function getTagEmoji(tag) {
+      return { movies:'🎬', tv:'📺', sports:'🏟️', gaming:'🎮', travel:'✈️', other:'🌀' }[tag] || '🌀';
+    }
+
+    function esc(text) {
+      if (!text) return '';
+      const d = document.createElement('div'); d.textContent = text; return d.innerHTML;
+    }
+
+    function showToast(message, type) {
+      const t = document.createElement('div'); t.className = 'toast toast-' + (type || 'success');
+      t.textContent = message; document.getElementById('toastContainer').appendChild(t);
+      setTimeout(() => t.remove(), 4000);
+    }
+
+    document.getElementById('postDetailModal').addEventListener('click', function(e) { if (e.target === this) closePostDetail(); });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePostDetail(); });
+  </script>
+</body>
+</html>

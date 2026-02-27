@@ -1,0 +1,3 @@
+# Netlify redirects
+# Ensure app.html is accessible
+/app    /app.html   200
